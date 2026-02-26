@@ -1,8 +1,16 @@
 package com.dezonnov1;
 
 import java.time.LocalDateTime;
+import java.util.Random;
 
 public class BankAccount {
+
+    private static final int NUMBER_LONG = 8;
+    private static final String NUMBER_STRING_FORMAT = "\\d{%d}".formatted(NUMBER_LONG);
+
+    private static final long DEFAULT_BLOCK_BALANCE = 0;
+    private static final boolean DEFAULT_BLOCK_STATE = false;
+
     private String owner;
 
     public String getOwner() {
@@ -43,8 +51,33 @@ public class BankAccount {
         this.blocked = blocked;
     }
 
+    private String number;
+
+    public String getNumber() {
+        return number;
+    }
+
+    /**
+     *
+     * @param number строка из цифр (0-9) длинной в 8 символов
+     * @throws IllegalArgumentException Если не подходит под условие.
+     */
+    protected void setNumber(String number) throws IllegalArgumentException {
+        try {
+            if (isValidNumber(number)) {
+                this.number = number;
+            }
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("number is not valid");
+        }
+    }
+
+    public boolean isValidNumber(String number) {
+        return number.matches(NUMBER_STRING_FORMAT);
+    }
+
     public BankAccount(String owner) {
-        this(owner, 0, false);
+        this(owner, DEFAULT_BLOCK_BALANCE, DEFAULT_BLOCK_STATE);
     }
 
     public BankAccount(String owner, long balance, boolean blocked) {
@@ -52,6 +85,7 @@ public class BankAccount {
         this.balance = balance;
         this.openDate = LocalDateTime.now();
         this.blocked = blocked;
+        this.number = generateNumber();
     }
 
 
@@ -63,9 +97,14 @@ public class BankAccount {
      *
      */
     public void deposit(long amount) throws IllegalArgumentException {
-        if (depositIsPossible(amount)) {
-            this.setBalance(this.getBalance() + amount);
+        try {
+            if (depositIsPossible(amount)) {
+                this.setBalance(this.getBalance() + amount);
+            }
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(e);
         }
+
     }
 
     /**
@@ -76,8 +115,12 @@ public class BankAccount {
      *
      */
     public void withdraw(long amount) throws IllegalArgumentException {
-        if (withdrawIsPossible(amount)) {
-            this.setBalance(this.getBalance() - amount);
+        try {
+            if (withdrawIsPossible(amount)) {
+                this.setBalance(this.getBalance() - amount);
+            }
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(e);
         }
     }
 
@@ -90,9 +133,13 @@ public class BankAccount {
      *
      */
     public void transfer(BankAccount otherAccount, long amount) throws IllegalArgumentException {
-        if (transferIsPossible(otherAccount,amount)) {
-            this.withdraw(amount);
-            otherAccount.deposit(amount);
+        try {
+            if (transferIsPossible(otherAccount, amount)) {
+                this.withdraw(amount);
+                otherAccount.deposit(amount);
+            }
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(e);
         }
     }
 
@@ -138,12 +185,58 @@ public class BankAccount {
      * Возможность перевода суммы с аккаунта на otherAccount.
      *
      * @param otherAccount Аккаунт на который проверяется перевод.
-     * @param amount Сумма перевода.
+     * @param amount       Сумма перевода.
      * @return Если перевод возможен.
      * @throws IllegalArgumentException Причина по которой перевод невозможен.
      */
-    public boolean transferIsPossible(BankAccount otherAccount,long amount) throws IllegalArgumentException {
+    public boolean transferIsPossible(BankAccount otherAccount, long amount) throws IllegalArgumentException {
         // Возможно снятие с текущего И возможно пополнение на другом
-        return withdrawIsPossible(this.getBalance()) && otherAccount.depositIsPossible(amount);
+        try {
+            return withdrawIsPossible(this.getBalance()) && otherAccount.depositIsPossible(amount);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Генерирует номер счета
+     *
+     * @return Строка с номером счета
+     */
+    public String generateNumber() {
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder(NUMBER_LONG);
+        for (int i = 0; i < NUMBER_LONG; i++) {
+            sb.append(random.nextInt(10));
+        }
+        String number = sb.toString();
+        if (!isValidNumber(number)) {
+            throw new RuntimeException("number from generator is not valid");
+        }
+        return number;
+    }
+
+    @Override
+    public String toString() {
+        return "BankAccount{" +
+                "account number=" + getNumber() +
+                ", owner='" + getOwner() + "'" +
+                ", balance=" + getBalance() +
+                ", openDate=" + getOpenDate().toString() +
+                ", isBlocked=" + isBlocked() +
+                "}"
+                ;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return super.hashCode();
     }
 }
