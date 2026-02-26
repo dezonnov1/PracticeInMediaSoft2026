@@ -13,6 +13,15 @@ public class BankAccount {
 
     private String owner;
 
+    private long balance;
+
+    private LocalDateTime openDate;
+
+    private boolean blocked;
+
+    private String number;
+
+
     public String getOwner() {
         return owner;
     }
@@ -20,8 +29,6 @@ public class BankAccount {
     protected void setOwner(String owner) {
         this.owner = owner;
     }
-
-    private long balance;
 
     public long getBalance() {
         return balance;
@@ -31,8 +38,6 @@ public class BankAccount {
         this.balance = balance;
     }
 
-    private LocalDateTime openDate;
-
     public LocalDateTime getOpenDate() {
         return openDate;
     }
@@ -41,8 +46,6 @@ public class BankAccount {
         this.openDate = openDate;
     }
 
-    private boolean blocked;
-
     public boolean isBlocked() {
         return blocked;
     }
@@ -50,8 +53,6 @@ public class BankAccount {
     public void setBlocked(boolean blocked) {
         this.blocked = blocked;
     }
-
-    private String number;
 
     public String getNumber() {
         return number;
@@ -93,7 +94,7 @@ public class BankAccount {
      * Пополнение счета.
      *
      * @param amount Пополняемая сумма на счёт.
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException Если невозможно пополнить счёт на сумму.
      *
      */
     public void deposit(long amount) throws IllegalArgumentException {
@@ -111,7 +112,7 @@ public class BankAccount {
      * Снятие денег.
      *
      * @param amount Снимаемая сумма со счёта.
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException Если невозможно снять сумму со счета.
      *
      */
     public void withdraw(long amount) throws IllegalArgumentException {
